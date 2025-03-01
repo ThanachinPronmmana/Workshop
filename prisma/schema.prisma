@@ -12,6 +12,7 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
 //1 User มีหลาย Order
 //1 User มีหลาย Cart
 model User {
@@ -28,6 +29,7 @@ model User {
   createdAdd DateTime @default(now())
   updatedAdd DateTime @updatedAt
 }
+
 //1 product อยู่ หลาย Order
 //1 product อยู่ หลาย Cart
 //1 product อยู่ หลาย image
@@ -43,7 +45,10 @@ model Product {
   images      Image[]
   createdAdd  DateTime         @default(now())
   updatedAdd  DateTime         @updatedAt
+  category    Category?        @relation(fields: [categoryId], references: [id])
+  categoryId  Int?
 }
+
 //1 Oreder มีได้ หลาย product
 model Order {
   id          Int              @id @default(autoincrement())
@@ -55,6 +60,7 @@ model Order {
   orderedBy   User             @relation(fields: [orderById], references: [id])
   orderById   Int
 }
+
 //เก็บสินค้าและ order ไปเรื่อยๆ
 model ProductOnOrder {
   id        Int     @id @default(autoincrement())
@@ -67,11 +73,13 @@ model ProductOnOrder {
 }
 
 model Category {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   name       String
-  createdAdd DateTime @default(now())
-  updatedAdd DateTime @updatedAt
+  products   Product[]
+  createdAdd DateTime  @default(now())
+  updatedAdd DateTime  @updatedAt
 }
+
 //1 cart มีได้หลายสินค้า
 //Cart  สั่งโดยใคร
 model Cart {
@@ -80,7 +88,7 @@ model Cart {
   cartTotle   Float
   createdAdd  DateTime        @default(now())
   updatedAdd  DateTime        @updatedAt
-  orderedBy   User            @relation(fields: [orderedById], references: [id] )
+  orderedBy   User            @relation(fields: [orderedById], references: [id])
   orderedById Int
 }
 

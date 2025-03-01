@@ -32,9 +32,8 @@ exports.register = async(req,res)=>{
                 password:hashPassword
             }
         })
-    
 
-  
+        
         res.send("Register Success")
     }catch(err){
         console.log(err)
@@ -46,10 +45,45 @@ exports.register = async(req,res)=>{
 
 
 }
-exports.login = async(req,res)=>{
-
+exports.login = async (req,res)=>{
+    
     try{
-        res.send("hello login c")
+        const {email,password} = req.body
+        const user = await prisma.user.findFirst({
+            where:{
+                email:email
+            }
+        })
+        if(!user || !user.enabled){
+            res.status(400).json({
+                message:"User Not found or not enabled"
+            })
+        }
+        const is_Match = await bcrypt.compare(password,user.password)
+        if(!is_Match){
+            return res.status(400).json({
+                message:"Password invalid"
+            })
+        }
+        const paylond = {
+            id:user.id,
+            email:user.email,
+            role:user.role
+        }
+
+        jwt.sign(paylond,process.env.SECRET,{
+            expiresIn:"1d"
+        },(err,token)=>{
+            if(err){
+                return res.status(500).json({
+                    message:"Server error"
+                })
+            }
+            res.json({
+                paylond,token
+            })
+        })
+        
     }catch(err){
         console.log(err)
         res.status(500).json({
@@ -62,9 +96,13 @@ exports.currentUser = async(req,res)=>{
     try{
         res.send("Hello user")
     }catch(err){
+
+
+
         console.log(err)
         res.status(500).json({
             massage:"Server error"
         })
     }
 }
+
